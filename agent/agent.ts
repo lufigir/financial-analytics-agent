@@ -27,14 +27,15 @@ export default defineAgent({
   //   25,000 TPM, vs. 356,250 TPM for mistral-medium-2508 — a ~14x gap for
   //   presumably the same underlying model. That's what was causing the
   //   frequent "Rate limit exceeded" errors, not genuine overuse.
-  // - mistral-medium-2508 (current): the dated snapshot "-latest" currently
-  //   points to. Same eval results as mistral-medium-latest (pin, don't
-  //   re-verify from scratch, unless Mistral rotates what "-latest" means
-  //   underneath it), but without the alias's separate low quota. Unlike
-  //   Devstral this is metered, paid API usage, not free tier.
-  model: mistral("mistral-medium-2508"),
+  // - mistral-medium-2508: the dated snapshot "-latest" pointed to. Same eval
+  //   results as mistral-medium-latest, but without the alias's separate low
+  //   quota. Metered, paid API usage.
+  // - codestral-latest (current): the API key was rotated to one whose quota
+  //   only covers Codestral — every chat model above (medium, small) returns
+  //   "Rate limit exceeded" on it from the first request.
+  model: mistral("codestral-latest"),
   // Manually maintained: bypassing the AI Gateway means eve can't look this
-  // up from catalog metadata. Update if Mistral revises Medium's context window.
+  // up from catalog metadata. Update if the model or its context window changes.
   modelContextWindowTokens: 128000,
   // Aggressive compaction to keep context focused on current task
   compaction: {
