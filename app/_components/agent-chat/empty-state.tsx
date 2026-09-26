@@ -12,6 +12,7 @@ import {
   WalletIcon,
   WavesIcon,
 } from "lucide-react";
+import { useSyncExternalStore } from "react";
 import {
   Tooltip,
   TooltipContent,
@@ -51,6 +52,12 @@ const fmtToday = () =>
     year: "numeric",
   }).format(new Date());
 
+// The page is prerendered at build time, so the date and greeting must come
+// from the visitor's clock: null on the server, the live value on the client.
+const noopSubscribe = () => () => {};
+const useClientValue = (read: () => string) =>
+  useSyncExternalStore(noopSubscribe, read, () => null);
+
 export function ChatEmptyState({
   composer,
   highlights,
@@ -62,18 +69,16 @@ export function ChatEmptyState({
   readonly onSuggestionSelect: (suggestion: string) => void;
   readonly questions: readonly string[];
 }) {
+  const today = useClientValue(fmtToday);
+  const greeting = useClientValue(timeGreeting);
+
   return (
     <div className="flex min-h-0 flex-1 flex-col justify-center overflow-hidden">
       <div className="mx-auto flex w-full max-w-3xl shrink-0 flex-col gap-4 px-4 sm:px-6">
         <div className="space-y-0.5">
-          <p className="text-muted-foreground text-xs" suppressHydrationWarning>
-            {fmtToday()}
-          </p>
-          <h1
-            className="font-semibold text-xl tracking-tight"
-            suppressHydrationWarning
-          >
-            {timeGreeting()}
+          <p className="text-muted-foreground text-xs">{today ?? "\u00a0"}</p>
+          <h1 className="font-semibold text-xl tracking-tight">
+            {greeting ?? "\u00a0"}
           </h1>
           <p className="text-muted-foreground text-sm">
             Query revenue, budget performance, and spending anomalies across
